@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'cursospv@vamosporeducacion.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /authorizedEmails/{emailId} {
+      // Administrator can view, add, modify, and delete any authorized email
+      allow read, write: if isAdmin();
+
+      // Authenticated users can check if their own email is in the authorized list
+      allow get: if isSignedIn() && (
+        resource.data.email == request.auth.token.email ||
+        emailId == request.auth.token.email
+      );
+      
+      allow list: if isSignedIn() && (
+        isAdmin() ||
+        resource.data.email == request.auth.token.email
+      );
+    }
+
+    match /quizResults/{resultId} {
+      allow create: if isSignedIn() 
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.score is number
+        && request.resource.data.totalQuestions is number
+        && request.resource.data.userAnswers is list
+        && request.resource.data.createdAt == request.time;
+      
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || 
+        isAdmin()
+      );
+    }
+  }
+}

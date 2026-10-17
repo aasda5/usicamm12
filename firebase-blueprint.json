@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "UserQuizResult": {
+      "title": "User Quiz Result",
+      "description": "Results of a quiz session for a specific user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID" },
+        "userEmail": { "type": "string", "description": "User email address" },
+        "score": { "type": "number", "description": "Number of correct answers" },
+        "totalQuestions": { "type": "number", "description": "Total number of questions in the quiz" },
+        "userAnswers": { "type": "array", "description": "Array of selected answer indices" },
+        "correctAnswers": { "type": "array", "description": "Array of correct answer indices" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the result was saved" }
+      },
+      "required": ["userId", "score", "totalQuestions", "userAnswers", "createdAt"]
+    },
+    "AuthorizedEmail": {
+      "title": "Authorized Email",
+      "description": "Email address allowed by the administrator to access the USICAMM quiz.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "Email address of the student" },
+        "active": { "type": "boolean", "description": "Whether access is granted" },
+        "name": { "type": "string", "description": "Name or identifier of the student" },
+        "notes": { "type": "string", "description": "Notes from the administrator" },
+        "addedAt": { "type": "string", "format": "date-time", "description": "When the authorization was created" },
+        "addedBy": { "type": "string", "description": "Admin email who authorized" }
+      },
+      "required": ["email", "active"]
+    }
+  },
+  "firestore": {
+    "quizResults": {
+      "schema": "UserQuizResult",
+      "description": "Collection of all quiz results."
+    },
+    "authorizedEmails": {
+      "schema": "AuthorizedEmail",
+      "description": "Whitelist of email addresses authorized to access the quiz."
+    }
+  }
+}
